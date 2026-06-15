@@ -1,0 +1,574 @@
+import { useState } from "react";
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const productData = {
+  name: "جهاز العرض المحمول الذكي Mini Smart Projector",
+  model: "Magcubic HY300 / Green Lion Nova 2",
+  price: "١٧٠ – ٢٥٠ ريال",
+  category: "أجهزة عرض محمولة",
+  rating: "4.6 / 5",
+  amazonBadge: "#1 Best Seller",
+  commission: "٨٪ – ١٢٪",
+  problem: "الشاشة الصغيرة تدمر تجربة المشاهدة الجماعية مع العيلة والأصحاب",
+  solution: "يحول أي جدار أبيض إلى شاشة سينما ١٠٠ بوصة في ثوانٍ — بحجم كف اليد",
+  wowFactor: "اللحظة التي يُضيء فيها الجدار بصورة ضخمة = أعلى معدل إعادة مشاهدة على تيك توك",
+  targetAudience: ["شباب ١٨–٣٥ سنة", "طلاب الجامعات", "العوائل السعودية", "عشاق التخييم والرحلات"],
+  whyThis: [
+    { icon: "🎯", title: "يحل مشكلة حقيقية ومؤلمة", desc: "٧٢٪ من السعوديين يشاهدون محتوى جماعياً — لكن الشاشة الصغيرة تقتل التجربة" },
+    { icon: "🔥", title: "Wow Effect مضمون", desc: "لحظة إضاءة الجدار بالصورة تجعل المشاهد يوقف الإصبع فوراً — أعلى hook rate في فئة التقنية" },
+    { icon: "💰", title: "سعر في المتناول", desc: "١٧٠–٢٥٠ ريال = قرار شراء سهل. لا يحتاج تفكير طويل، الزبون يضغط ويشتري" },
+    { icon: "🌙", title: "ثقافة سعودية مطابقة ١٠٠٪", desc: "السهرات، الهوش، التخييم — كلها مناسبات مثالية لهذا المنتج في السوق السعودي" },
+    { icon: "📈", title: "موسم مبيعات لا ينتهي", desc: "رمضان، العيد، اليوم الوطني، الصيف، الشتاء — مناسبات دائمة طوال العام" },
+    { icon: "🔄", title: "Re-purchase وهدايا", desc: "يُشترى كهدية بكثافة — يعني حركة بيع مستمرة ومتكررة بدون جهد إضافي" },
+  ],
+  specs: [
+    { label: "الدقة", val: "FHD 1080p" },
+    { label: "حجم الصورة", val: "حتى ٢٠٠ بوصة" },
+    { label: "الاتصال", val: "WiFi + Bluetooth" },
+    { label: "الصوت", val: "مكبر صوت مدمج ١٠W" },
+    { label: "الوزن", val: "أقل من ٥٠٠ غرام" },
+    { label: "الشحن", val: "بطارية + كهرباء" },
+  ]
+};
+
+const scriptRows = [
+  {
+    sec: "0 – 3",
+    phase: "HOOK",
+    phaseColor: "#FF4D00",
+    script: "\"وش تقول شاشتك صغيرة؟ 😤 شوف ها الحل اللي غيّر سهراتنا كلياً!\"",
+    visual: "📱 كلوزآب على شاشة جوال صغيرة تشاهد فيديو — وجه المؤدي يعبّس. كاميرا سريعة، إضاءة حادة.",
+    popups: "❌ \"شاشتك صغيرة؟\" | ✨ تأثير صوت 'وقف مفاجئ' | نص أبيض كبير يومض على الشاشة",
+    note: "Hook بالمشكلة"
+  },
+  {
+    sec: "3 – 8",
+    phase: "WOW",
+    phaseColor: "#7B2FBE",
+    script: "\"ثلاث ثواني... وهذا اللي صار 🤯\"",
+    visual: "🎬 كاميرا تتحرك ببطء نحو جهاز صغير في اليد — ثم WIDE SHOT يكشف جداراً كاملاً مضاءً بصورة ضخمة ١٠٠ بوصة في غرفة مظلمة. اللحظة الأيقونية.",
+    popups: "⚡ \"١٠٠ بوصة في ثلاث ثواني\" | Slow-motion لحظة إضاءة الجدار | صوت 'WOW' خافت",
+    note: "لحظة الـ Wow"
+  },
+  {
+    sec: "8 – 15",
+    phase: "DEMO",
+    phaseColor: "#059669",
+    script: "\"جهاز عرض ذكي، بحجم كف اليد — يشتغل على الجدار، السقف، أي مكان! في البيت، الهوش، حتى في الخيمة! 🔥\"",
+    visual: "🎞️ مونتاج سريع 3 مشاهد: (١) غرفة النوم - صورة على السقف (٢) الهوش ليلاً - جلسة أصحاب يضحكون (٣) خيمة تخييم - مباراة كرة تُعرض على قماش أبيض. كل مشهد 2 ثانية.",
+    popups: "📍 \"البيت\" → \"الهوش\" → \"الطبيعة\" | نصوص سريعة بخط أبيض عريض",
+    note: "تعدد الاستخدامات"
+  },
+  {
+    sec: "15 – 22",
+    phase: "BENEFIT",
+    phaseColor: "#D97706",
+    script: "\"واي فاي، بلوتوث، بطارية — شغّله وين ما بيك! وبدون كابلات وعقدة رأس 💯\"",
+    visual: "📲 يد تضغط زر الجهاز وتربطه بالجوال لاسلكياً — لقطة كلوزآب 'snap' ناعمة. ثم العرض يبدأ تلقائياً بدون أسلاك.",
+    popups: "✅ WiFi ✅ Bluetooth ✅ Battery | \"بلا كابلات\" بنص كبير يضرب على الشاشة",
+    note: "الميزة التنافسية"
+  },
+  {
+    sec: "22 – 30",
+    phase: "SOCIAL PROOF",
+    phaseColor: "#2563EB",
+    script: "\"وأنا ما صدقت لما جربته! السعر؟ أقل من ٢٥٠ ريال! بجد تستاهل كل ريال! 😍\"",
+    visual: "🤩 وجه المؤدي بتعبير مندهش حقيقي — ثم كلوزآب على جهاز العرض الصغير في يده مقابل الجدار الكبير خلفه. تأثير بصري قوي = صغير في اليد / ضخم على الجدار.",
+    popups: "💬 \"أقل من ٢٥٠ ريال\" بلون ذهبي | ⭐⭐⭐⭐⭐ \"آلاف التقييمات\" يومض",
+    note: "السعر + الثقة"
+  },
+  {
+    sec: "30 – 38",
+    phase: "CTA",
+    phaseColor: "#DC2626",
+    script: "\"الرابط في التعليق الأول أو في البايو — اطلبه من أمازون السعودية وتسلم بالبيت! 🛒 والرصيد يحتمل هههه\"",
+    visual: "📦 لقطة نهائية: المنتج في علبته مع لوغو أمازون واضح. ثم ZOOM OUT تكشف صورة عرض ضخمة على الجدار — ينتهي بلقطة السهرة الجماعية والضحك.",
+    popups: "🛒 \"اطلبه الآن\" | 🔗 \"الرابط في الكومنت الأول\" | ⬇️ سهم يشير للأسفل يومض | لوغو Amazon.sa",
+    note: "CTA واضح"
+  },
+  {
+    sec: "38 – 43",
+    phase: "LOOP",
+    phaseColor: "#6366F1",
+    script: "[موسيقى تصاعدية] — بدون كلام — صورة نهائية مثيرة",
+    visual: "🌙 لقطة أخيرة سينمائية: غرفة مظلمة كاملاً، الجهاز الصغير في المنتصف، والجدار يضيء بصورة ضخمة مليئة بالألوان — تأثير Fade Out بطيء.",
+    popups: "\"سينماك في بيتك 🎬\" | Branding خفيف في الزاوية",
+    note: "Loop trigger"
+  }
+];
+
+const phases = {
+  "HOOK": { label: "الخطاف", color: "#FF4D00" },
+  "WOW": { label: "لحظة الإبهار", color: "#7B2FBE" },
+  "DEMO": { label: "العرض التوضيحي", color: "#059669" },
+  "BENEFIT": { label: "الميزة التنافسية", color: "#D97706" },
+  "SOCIAL PROOF": { label: "الدليل الاجتماعي", color: "#2563EB" },
+  "CTA": { label: "الدعوة للشراء", color: "#DC2626" },
+  "LOOP": { label: "محفز التكرار", color: "#6366F1" }
+};
+
+// ─── COMPONENT ────────────────────────────────────────────────────────────────
+
+export default function MarketingBrief() {
+  const [tab, setTab] = useState("product");
+  const [expandedRow, setExpandedRow] = useState(null);
+
+  return (
+    <div style={{
+      fontFamily: "'Segoe UI', Tahoma, sans-serif",
+      background: "#07070F",
+      minHeight: "100vh",
+      color: "#F0F0F8",
+      direction: "rtl",
+    }}>
+
+      {/* ── HEADER ── */}
+      <div style={{
+        background: "linear-gradient(135deg, #0d001f 0%, #001233 60%, #0d1a00 100%)",
+        padding: "28px 20px 20px",
+        borderBottom: "1px solid #1e1e35",
+        position: "relative",
+        overflow: "hidden"
+      }}>
+        {/* Glow */}
+        <div style={{
+          position: "absolute", top: -60, right: -60,
+          width: 220, height: 220, borderRadius: "50%",
+          background: "radial-gradient(circle, #7B2FBE33, transparent 70%)",
+          pointerEvents: "none"
+        }} />
+        <div style={{ fontSize: 11, color: "#6060a0", letterSpacing: 3, marginBottom: 6, textTransform: "uppercase" }}>
+          🇸🇦 خبير التجارة الإلكترونية — أمازون السعودية ٢٠٢٦
+        </div>
+        <h1 style={{
+          margin: "0 0 4px",
+          fontSize: 22,
+          fontWeight: 900,
+          background: "linear-gradient(90deg, #FF4D00, #7B2FBE, #00C2FF)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent"
+        }}>
+          تحليل المنتج + سيناريو الفيديو الإعلاني
+        </h1>
+        <p style={{ margin: 0, color: "#7070a0", fontSize: 12 }}>
+          مبني على بيانات حقيقية من السوق السعودي وخوارزميات تيك توك ٢٠٢٦
+        </p>
+      </div>
+
+      {/* ── TABS ── */}
+      <div style={{ display: "flex", gap: 6, padding: "14px 16px 0", overflowX: "auto" }}>
+        {[
+          ["product", "🎯 اختيار المنتج"],
+          ["why", "💡 لماذا هذا المنتج؟"],
+          ["script", "🎬 السيناريو الكامل"],
+        ].map(([id, label]) => (
+          <button key={id} onClick={() => setTab(id)} style={{
+            padding: "9px 18px",
+            borderRadius: 20,
+            border: "1px solid",
+            borderColor: tab === id ? "#7B2FBE" : "#1e1e35",
+            background: tab === id
+              ? "linear-gradient(135deg,#2a0060,#001a60)"
+              : "#0f0f1a",
+            color: tab === id ? "#fff" : "#7070a0",
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: tab === id ? 800 : 400,
+            whiteSpace: "nowrap",
+            transition: "all 0.2s"
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* ══════════════════════ TAB 1: PRODUCT ══════════════════════ */}
+      {tab === "product" && (
+        <div style={{ padding: 16 }}>
+
+          {/* Product Card */}
+          <div style={{
+            background: "linear-gradient(135deg, #0d0020, #00102a)",
+            border: "1px solid #7B2FBE44",
+            borderRadius: 20,
+            padding: 20,
+            marginBottom: 14,
+            position: "relative",
+            overflow: "hidden"
+          }}>
+            <div style={{
+              position: "absolute", top: -40, left: -40,
+              width: 180, height: 180, borderRadius: "50%",
+              background: "radial-gradient(circle, #7B2FBE22, transparent 70%)"
+            }} />
+
+            {/* Badge row */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+              {["#1 Best Seller 🏆", "٨٪–١٢٪ عمولة 💰", "Wow Effect ⚡"].map(b => (
+                <span key={b} style={{
+                  padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700,
+                  background: "#7B2FBE22", border: "1px solid #7B2FBE44", color: "#c090ff"
+                }}>{b}</span>
+              ))}
+            </div>
+
+            {/* Projector visual */}
+            <div style={{
+              background: "#0a0020",
+              border: "1px solid #2a1050",
+              borderRadius: 16,
+              padding: "20px 16px",
+              textAlign: "center",
+              marginBottom: 16
+            }}>
+              <div style={{ fontSize: 56, marginBottom: 8 }}>📽️</div>
+              <div style={{ fontSize: 13, color: "#c0c0e0", fontWeight: 800, marginBottom: 4 }}>
+                {productData.name}
+              </div>
+              <div style={{ fontSize: 11, color: "#6060a0" }}>{productData.model}</div>
+              <div style={{
+                display: "inline-block",
+                marginTop: 10,
+                padding: "6px 20px",
+                borderRadius: 20,
+                background: "linear-gradient(90deg, #FF4D00, #FF8C00)",
+                color: "#fff",
+                fontSize: 14,
+                fontWeight: 900
+              }}>
+                {productData.price} ريال سعودي
+              </div>
+            </div>
+
+            {/* Problem / Solution */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+              <div style={{
+                padding: 12, borderRadius: 12,
+                background: "#FF4D0012", border: "1px solid #FF4D0030",
+                borderRight: "3px solid #FF4D00"
+              }}>
+                <div style={{ fontSize: 10, color: "#FF4D00", fontWeight: 700, marginBottom: 6 }}>❌ المشكلة</div>
+                <div style={{ fontSize: 11, color: "#d0d0e0", lineHeight: 1.7 }}>{productData.problem}</div>
+              </div>
+              <div style={{
+                padding: 12, borderRadius: 12,
+                background: "#00CC6612", border: "1px solid #00CC6630",
+                borderRight: "3px solid #00CC66"
+              }}>
+                <div style={{ fontSize: 10, color: "#00CC66", fontWeight: 700, marginBottom: 6 }}>✅ الحل</div>
+                <div style={{ fontSize: 11, color: "#d0d0e0", lineHeight: 1.7 }}>{productData.solution}</div>
+              </div>
+            </div>
+
+            {/* Wow Factor */}
+            <div style={{
+              padding: 12, borderRadius: 12,
+              background: "linear-gradient(135deg, #7B2FBE15, #FF4D0015)",
+              border: "1px solid #7B2FBE44"
+            }}>
+              <div style={{ fontSize: 10, color: "#c090ff", fontWeight: 700, marginBottom: 4 }}>⚡ عامل الـ WOW</div>
+              <div style={{ fontSize: 11, color: "#c0c0e0", lineHeight: 1.7 }}>{productData.wowFactor}</div>
+            </div>
+          </div>
+
+          {/* Specs */}
+          <div style={{
+            background: "#0f0f1a", border: "1px solid #1e1e35",
+            borderRadius: 16, padding: 16, marginBottom: 14
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#a0a0d0", marginBottom: 12 }}>
+              📋 المواصفات الجوهرية
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {productData.specs.map((s, i) => (
+                <div key={i} style={{
+                  display: "flex", justifyContent: "space-between",
+                  padding: "8px 12px", borderRadius: 8,
+                  background: "#14142a", border: "1px solid #1e1e40"
+                }}>
+                  <span style={{ fontSize: 11, color: "#6060a0" }}>{s.label}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#c090ff" }}>{s.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Target Audience */}
+          <div style={{
+            background: "#0f0f1a", border: "1px solid #1e1e35",
+            borderRadius: 16, padding: 16
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#a0a0d0", marginBottom: 12 }}>
+              👥 الجمهور المستهدف
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {productData.targetAudience.map((a, i) => (
+                <span key={i} style={{
+                  padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 600,
+                  background: "#00C2FF15", border: "1px solid #00C2FF33", color: "#60d0ff"
+                }}>{a}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════ TAB 2: WHY ══════════════════════ */}
+      {tab === "why" && (
+        <div style={{ padding: 16 }}>
+          <div style={{
+            padding: 14, borderRadius: 14,
+            background: "linear-gradient(135deg,#0d0020,#001020)",
+            border: "1px solid #7B2FBE33",
+            marginBottom: 14
+          }}>
+            <div style={{ fontSize: 12, color: "#9090c0", lineHeight: 1.8 }}>
+              بعد ١٠ سنوات في السوق الخليجي، هذا المنتج تحديداً يجتمع فيه ٦ عوامل نجاح نادراً ما تتوفر في نفس الوقت. إليك كل واحدة بالتفصيل:
+            </div>
+          </div>
+
+          {productData.whyThis.map((item, i) => (
+            <div key={i} style={{
+              marginBottom: 10, padding: 16, borderRadius: 14,
+              background: "#0f0f1a", border: "1px solid #1e1e35",
+              borderRight: `3px solid ${["#FF4D00","#7B2FBE","#059669","#D97706","#2563EB","#DC2626"][i]}`
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 24 }}>{item.icon}</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: ["#FF7040","#c090ff","#40d090","#f0b040","#60a0ff","#ff7070"][i] }}>
+                  {item.title}
+                </span>
+              </div>
+              <div style={{ fontSize: 12, color: "#9090b0", lineHeight: 1.8, paddingRight: 34 }}>
+                {item.desc}
+              </div>
+            </div>
+          ))}
+
+          {/* Expert note */}
+          <div style={{
+            marginTop: 4, padding: 16, borderRadius: 14,
+            background: "linear-gradient(135deg,#0a1500,#001020)",
+            border: "1px solid #2a4020"
+          }}>
+            <div style={{ fontSize: 12, color: "#80C060", fontWeight: 700, marginBottom: 8 }}>
+              💼 رأي الخبير
+            </div>
+            <div style={{ fontSize: 12, color: "#90b070", lineHeight: 1.8 }}>
+              أجهزة العرض الصغيرة هي <strong style={{color:"#b0d090"}}>الفئة الأعلى فيرالية</strong> في تيك توك لعام ٢٠٢٦. السبب بسيط: اللحظة البصرية (جدار صغير يتحول لسينما) تُوقف الإصبع تلقائياً، وتحقق أعلى <strong style={{color:"#b0d090"}}>Re-watch Rate</strong> — وهو أقوى إشارة في خوارزمية تيك توك ٢٠٢٦. مع سعر يبدأ من ١٧٠ ريال وعمولة تصل ١٢٪، العائد الحسابي ممتاز حتى بدون حجم بيع ضخم.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════ TAB 3: SCRIPT ══════════════════════ */}
+      {tab === "script" && (
+        <div style={{ padding: 16 }}>
+
+          {/* Script Header */}
+          <div style={{
+            background: "linear-gradient(135deg,#0d0020,#001a30)",
+            border: "1px solid #2a2a50",
+            borderRadius: 16, padding: 16, marginBottom: 14
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+              {[
+                ["⏱️", "المدة", "٤٣ ثانية"],
+                ["🎯", "المنصة", "TikTok / Reels"],
+                ["🗣️", "اللهجة", "سعودية بيضاء"],
+                ["📐", "النسبة", "9:16 عمودي"]
+              ].map(([icon, label, val]) => (
+                <div key={label} style={{
+                  flex: "1 1 calc(50% - 8px)",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "#0a0a1a",
+                  border: "1px solid #1e1e35"
+                }}>
+                  <div style={{ fontSize: 10, color: "#5050a0", marginBottom: 2 }}>{icon} {label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#c0c0e0" }}>{val}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Timeline visual */}
+          <div style={{
+            display: "flex", gap: 3, marginBottom: 14,
+            padding: "12px 14px", borderRadius: 12,
+            background: "#0f0f1a", border: "1px solid #1e1e35"
+          }}>
+            {scriptRows.map((row, i) => (
+              <div
+                key={i}
+                title={phases[row.phase]?.label}
+                style={{
+                  flex: row.phase === "LOOP" ? 0.5 : 1,
+                  height: 28,
+                  borderRadius: 4,
+                  background: row.phaseColor + "cc",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 8,
+                  color: "#fff",
+                  fontWeight: 700,
+                  transition: "transform 0.15s",
+                  transform: expandedRow === i ? "scaleY(1.2)" : "none"
+                }}
+                onClick={() => setExpandedRow(expandedRow === i ? null : i)}
+              >
+                {row.sec}ث
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+            {Object.entries(phases).map(([key, val]) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: val.color }} />
+                <span style={{ fontSize: 10, color: "#6060a0" }}>{val.label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Script Rows */}
+          {scriptRows.map((row, i) => (
+            <div
+              key={i}
+              onClick={() => setExpandedRow(expandedRow === i ? null : i)}
+              style={{
+                marginBottom: 10,
+                borderRadius: 14,
+                border: "1px solid",
+                borderColor: expandedRow === i ? row.phaseColor : "#1e1e35",
+                background: expandedRow === i ? row.phaseColor + "0a" : "#0f0f1a",
+                overflow: "hidden",
+                cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+            >
+              {/* Row Header */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px" }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: 10, flexShrink: 0,
+                  background: row.phaseColor + "22",
+                  border: `1px solid ${row.phaseColor}44`,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center"
+                }}>
+                  <span style={{ fontSize: 9, color: row.phaseColor, fontWeight: 700 }}>ث</span>
+                  <span style={{ fontSize: 12, color: "#fff", fontWeight: 900 }}>{row.sec}</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    display: "inline-block",
+                    padding: "2px 10px", borderRadius: 10,
+                    background: row.phaseColor + "22",
+                    border: `1px solid ${row.phaseColor}44`,
+                    color: row.phaseColor,
+                    fontSize: 10, fontWeight: 800, marginBottom: 4
+                  }}>
+                    {phases[row.phase]?.label} · {row.phase}
+                  </div>
+                  <div style={{
+                    fontSize: 12, color: "#c0c0d8",
+                    lineHeight: 1.5,
+                    display: "-webkit-box",
+                    WebkitLineClamp: expandedRow === i ? "unset" : 1,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden"
+                  }}>
+                    {row.script}
+                  </div>
+                </div>
+                <div style={{ color: "#3030a0", fontSize: 16, flexShrink: 0 }}>
+                  {expandedRow === i ? "▲" : "▼"}
+                </div>
+              </div>
+
+              {/* Row Expanded */}
+              {expandedRow === i && (
+                <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${row.phaseColor}22` }}>
+
+                  {/* Script text */}
+                  <div style={{
+                    padding: 12, borderRadius: 10,
+                    background: "#07071a", border: `1px solid ${row.phaseColor}33`,
+                    marginTop: 12, marginBottom: 10
+                  }}>
+                    <div style={{ fontSize: 10, color: row.phaseColor, fontWeight: 700, marginBottom: 6 }}>
+                      🗣️ النص الصوتي / الحوار
+                    </div>
+                    <div style={{ fontSize: 13, color: "#e0e0f0", lineHeight: 1.8, fontWeight: 500 }}>
+                      {row.script}
+                    </div>
+                  </div>
+
+                  {/* Visual + Popups */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 8 }}>
+                    <div style={{
+                      padding: 12, borderRadius: 10,
+                      background: "#07071a", border: "1px solid #1e1e35"
+                    }}>
+                      <div style={{ fontSize: 10, color: "#6090ff", fontWeight: 700, marginBottom: 6 }}>
+                        🎥 اللقطة البصرية
+                      </div>
+                      <div style={{ fontSize: 11, color: "#a0a0c8", lineHeight: 1.8 }}>{row.visual}</div>
+                    </div>
+                    <div style={{
+                      padding: 12, borderRadius: 10,
+                      background: "#07071a", border: "1px solid #1e1e35"
+                    }}>
+                      <div style={{ fontSize: 10, color: "#f0a030", fontWeight: 700, marginBottom: 6 }}>
+                        ✨ المؤثرات + نصوص الشاشة (Pop-up Text)
+                      </div>
+                      <div style={{ fontSize: 11, color: "#a0a0c8", lineHeight: 1.8 }}>{row.popups}</div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    marginTop: 8, padding: "6px 12px", borderRadius: 8,
+                    background: row.phaseColor + "15",
+                    fontSize: 10, color: row.phaseColor, fontWeight: 700
+                  }}>
+                    📌 الهدف من هذا المقطع: {row.note}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Pro Tips */}
+          <div style={{
+            marginTop: 6, padding: 16, borderRadius: 14,
+            background: "linear-gradient(135deg,#0a1500,#001510)",
+            border: "1px solid #1a4020"
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#60d080", marginBottom: 12 }}>
+              ⚡ نصائح الإنتاج من الخبير
+            </div>
+            {[
+              { icon: "🎵", tip: "استخدم صوتاً ترند حماسياً في الخلفية — يرفع معدل الإكمال ٣٠٪" },
+              { icon: "📱", tip: "صوّر عمودياً ٩:١٦ فقط، لا تقلب الفيديو — كل ثانية أفقية تقتل الـ Watch Time" },
+              { icon: "🌚", tip: "مشهد الغرفة المظلمة مع الضوء الكبير = أعلى Stop-Scroll Rate في فئتك" },
+              { icon: "⏱️", tip: "لا تتجاوز ٤٥ ثانية — أقصر = معدل إكمال أعلى = Viral أسرع" },
+              { icon: "💬", tip: "في أول تعليق: ضع رابط أمازون مباشرة + السعر. لا تخلي الزبون يبحث" },
+              { icon: "🔁", tip: "النهاية السينمائية مصممة لتجعل الشخص يعيد المشاهدة — تعزز الـ Re-watch Signal" },
+            ].map((t, i) => (
+              <div key={i} style={{
+                display: "flex", gap: 8, alignItems: "flex-start",
+                marginBottom: 8, fontSize: 11, color: "#80b070", lineHeight: 1.7
+              }}>
+                <span style={{ flexShrink: 0, fontSize: 14 }}>{t.icon}</span>
+                <span>{t.tip}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom spacer */}
+      <div style={{ height: 24 }} />
+    </div>
+  );
+}
